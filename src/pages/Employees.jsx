@@ -4,6 +4,8 @@ import axios from 'axios';
 import AddEmployeeModal from '../components/AddEmployeeModal';
 import Swal from 'sweetalert2';
 
+const API_URL = import.meta.env.VITE_API_URL || 'https://factory-erp-server.vercel.app';
+
 const Employees = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [employees, setEmployees] = useState([]);
@@ -12,7 +14,7 @@ const Employees = () => {
 
   const fetchEmployees = async () => {
     try {
-      const res = await axios.get('http://localhost:5000/api/employees');
+      const res = await axios.get(`${API_URL}/api/employees`);
       setEmployees(res.data);
     } catch (err) {
       console.error("Error fetching employees:", err);
@@ -32,17 +34,16 @@ const Employees = () => {
       confirmButtonColor: '#e11d48',
       cancelButtonColor: '#1e293b',
       confirmButtonText: 'Yes, delete it!',
-      background: '#0f172a',
-      color: '#fff'
+      background: '#0f172a', color: '#fff'
     });
 
     if (result.isConfirmed) {
       try {
-        await axios.delete(`http://localhost:5000/api/employees/${id}`);
+        await axios.delete(`${API_URL}/api/employees/${id}`);
         setEmployees(employees.filter(emp => emp._id !== id));
-        Swal.fire({ title: 'Deleted!', text: 'Employee removed.', icon: 'success', background: '#0f172a', color: '#fff' });
+        Swal.fire({ title: 'Deleted!', icon: 'success', background: '#0f172a', color: '#fff' });
       } catch (err) {
-        Swal.fire({ title: 'Error!', text: 'Delete failed.', icon: 'error', background: '#0f172a', color: '#fff' });
+        Swal.fire({ title: 'Error!', icon: 'error', background: '#0f172a', color: '#fff' });
       }
     }
   };
@@ -61,12 +62,12 @@ const Employees = () => {
     <div className="space-y-8 pb-10">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-bold">Workforce Management</h1>
+          <h1 className="text-3xl font-bold text-white">Workforce Management</h1>
           <p className="text-slate-500">View and manage your factory employees</p>
         </div>
         <button 
           onClick={() => { setEditData(null); setIsModalOpen(true); }}
-          className="bg-blue-600 hover:bg-blue-500 px-6 py-3 rounded-2xl font-bold flex items-center gap-2 transition-all shadow-lg shadow-blue-600/20"
+          className="bg-blue-600 hover:bg-blue-500 px-6 py-3 rounded-2xl font-bold text-white flex items-center gap-2 transition-all shadow-lg shadow-blue-600/20"
         >
           <Plus size={20} /> Add Employee
         </button>
@@ -77,7 +78,7 @@ const Employees = () => {
         <input 
           type="text" 
           placeholder="Search by name or ID..." 
-          className="w-full bg-[#0f172a] border border-slate-800 rounded-2xl py-4 pl-12 pr-4 outline-none focus:border-blue-500 transition-all"
+          className="w-full bg-[#0f172a] border border-slate-800 rounded-2xl py-4 pl-12 pr-4 text-white outline-none focus:border-blue-500 transition-all"
           onChange={(e) => setSearchTerm(e.target.value)}
         />
       </div>
@@ -94,33 +95,20 @@ const Employees = () => {
                   <QrCode size={16} className="text-white" />
                 </div>
               </div>
-              
-              <h3 className="text-lg font-bold truncate w-full">{emp.fullName}</h3>
+              <h3 className="text-lg font-bold text-white truncate w-full">{emp.fullName}</h3>
               <p className="text-blue-400 text-sm font-medium">{emp.position}</p>
               <p className="text-slate-500 font-mono text-xs mt-1">{emp.employeeId}</p>
-
               <div className="flex gap-2 mt-6 w-full">
-                <a href={emp.qrCode} download={`${emp.fullName}_QR.png`} className="flex-1 bg-slate-900 hover:bg-slate-800 p-3 rounded-xl flex justify-center text-slate-400 hover:text-white transition-all">
-                  <Download size={18} />
-                </a>
-                <button onClick={() => handleEdit(emp)} className="flex-1 bg-slate-900 hover:bg-amber-600/20 p-3 rounded-xl flex justify-center text-slate-400 hover:text-amber-500 transition-all">
-                  <Edit2 size={18} />
-                </button>
-                <button onClick={() => deleteEmployee(emp._id)} className="flex-1 bg-slate-900 hover:bg-rose-600/20 p-3 rounded-xl flex justify-center text-slate-400 hover:text-rose-500 transition-all">
-                  <Trash2 size={18} />
-                </button>
+                <a href={emp.qrCode} download={`${emp.fullName}_QR.png`} className="flex-1 bg-slate-900 hover:bg-slate-800 p-3 rounded-xl flex justify-center text-slate-400 hover:text-white transition-all"><Download size={18} /></a>
+                <button onClick={() => handleEdit(emp)} className="flex-1 bg-slate-900 hover:bg-amber-600/20 p-3 rounded-xl flex justify-center text-slate-400 hover:text-amber-500 transition-all"><Edit2 size={18} /></button>
+                <button onClick={() => deleteEmployee(emp._id)} className="flex-1 bg-slate-900 hover:bg-rose-600/20 p-3 rounded-xl flex justify-center text-slate-400 hover:text-rose-500 transition-all"><Trash2 size={18} /></button>
               </div>
             </div>
           </div>
         ))}
       </div>
 
-      <AddEmployeeModal 
-        isOpen={isModalOpen} 
-        editData={editData}
-        onClose={() => { setIsModalOpen(false); setEditData(null); }} 
-        fetchEmployees={fetchEmployees}
-      />
+      <AddEmployeeModal isOpen={isModalOpen} editData={editData} onClose={() => { setIsModalOpen(false); setEditData(null); }} fetchEmployees={fetchEmployees} />
     </div>
   );
 };
